@@ -1,58 +1,140 @@
-Campfire Overhaul+
+# 🔥 CampfireOverhaul+
 
-Update version of the campfire overhaul mod by ZanderMeister.
-A mod that overhauls campfire mechanics to enhance immersion and usefulness.
+> *"For comfy nightstands out in the wilderness."*
 
-A link to the original project: https://www.curseforge.com/minecraft/mc-mods/campfire-overhaul
-Original mod author: https://legacy.curseforge.com/members/ZanderMeister/projects
+A community port of the original **Campfire Overhaul** by ZanderMeister to Minecraft 1.20.x and 1.21.x.  
+Transforms the vanilla campfire from an expensive, slow, and pretty much useless 4-slot smoker into an actual utility with new mechanics, recipes, and overall increased immersion.
 
-Changes from the original mod:
+---
 
-- Update version to 1.20.1 and 1.21.x
+## ✨ Features
 
--------------------------------------------
-Source installation information for modders
--------------------------------------------
-This code follows the Minecraft Forge installation methodology. It will apply
-some small patches to the vanilla MCP source code, giving you and it access 
-to some of the data and functions you need to build a successful mod.
+### 🪵 New Crafting Recipe
+Both normal and soul campfires can now be crafted in a **2x2 grid** - no crafting table needed!
+- **Normal campfire:** 2 logs + 2 sticks
+- **Soul campfire:** 1 log + 1 soul soil/sand + 2 sticks
 
-Note also that the patches are built against "un-renamed" MCP source code (aka
-SRG Names) - this means that you will not be able to read them directly against
-normal code.
+Perfect for survival situations when you don't have a crafting bench nearby.
 
-Setup Process:
-==============================
+---
 
-Step 1: Open your command-line and browse to the folder where you extracted the zip file.
+### 🍳 New Campfire Recipes
+Cook up to **4 items at once** directly on the campfire (slower than a furnace, but no fuel needed):
+- 🪵 Burn **logs** → **Charcoal**
+- 🔥 Craft **torches** from sticks
+- 🧽 Dry **wet sponges** back to dry
+- 🧱 Bake **clay** into **bricks**
 
-Step 2: You're left with a choice.
-If you prefer to use Eclipse:
-1. Run the following command: `./gradlew genEclipseRuns`
-2. Open Eclipse, Import > Existing Gradle Project > Select Folder 
-   or run `gradlew eclipse` to generate the project.
+---
 
-If you prefer to use IntelliJ:
-1. Open IDEA, and import project.
-2. Select your build.gradle file and have it import.
-3. Run the following command: `./gradlew genIntellijRuns`
-4. Refresh the Gradle Project in IDEA if required.
+### 🌑 Campfire Placed Unlit *(configurable)*
+Both campfire types are now created **unlit** by default.  
+Light them up vanilla-style: flint & steel, flaming arrows, fire charges - or use the new methods below.
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can 
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-(this does not affect your code) and then start the process again.
+---
 
-Mapping Names:
-=============================
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license, if you do not agree with it you can change your mapping names to other crowdsourced names in your 
-build.gradle. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
+### 🪨 Two-Flint Ignition *(configurable)*
+A new way to light campfires without flint & steel:
+1. Hold **Flint** in your **main hand**
+2. Hold **Flint** in your **offhand** (press **F** to swap)
+3. **Right-click** the unlit campfire
+4. Has a **1/3 (33%) chance** of success by default
 
-Additional Resources: 
-=========================
-Community Documentation: https://docs.minecraftforge.net/en/1.20.1/gettingstarted/
-LexManos' Install Video: https://youtu.be/8VEdtQLuLO0
-Forge Forums: https://forums.minecraftforge.net/
-Forge Discord: https://discord.minecraftforge.net/
+> You can configure the success chance or disable this mechanic entirely. Note: only works on campfires, not regular blocks.
+
+---
+
+### ⏳ Campfire Lifetime System *(configurable)*
+Campfires now have a **fuel lifetime** - when they run out of fuel, they die out.
+
+**Refueling:**
+- **Throw (Q) any burnable item** onto the campfire to add fuel
+- All vanilla fuels are supported, most modded fuels too
+- Throwing a **Lava Bucket** works too - the empty bucket is returned
+- Fuel items give the same amount of time as they do in a furnace
+- Set a **fuel multiplier** to make fuel last longer or shorter
+
+**Special mechanics:**
+- **Right-click with Dragon's Breath** *(item configurable)* to make the campfire burn **forever**
+- **Right-click with empty hands** to check remaining fuel in seconds
+- Soul campfires have **infinite lifetime** by default *(configurable)* to make them feel more unique
+- World-generated campfires (e.g. villages) are **infinite by default**
+
+**Burnout behavior** *(configurable)*:
+- Campfire simply **extinguishes** (default)
+- Or campfire completely **breaks** and drops its items
+
+---
+
+## ⚙️ Configuration (temporary)
+
+Config file location:
+```
+saves/[world_name]/serverconfig/campfire_overhaul-server.toml
+```
+
+### Normal Campfire
+| Option | Default | Description |
+|--------|---------|-------------|
+| `campfireCreatedUnlit` | `true` | Placed campfire starts unlit |
+| `campfireDefaultLifeTime` | `2000` ticks | Starting fuel when placed (20 ticks = 1 second) |
+| `campfireMaxLifeTime` | `MAX` | Maximum fuel limit |
+| `campfireInfiniteLifeTime` | `false` | Override — never burns out |
+| `campfireDestroyedOnBurnout` | `false` | Break instead of extinguish |
+
+### Soul Campfire
+| Option | Default | Description |
+|--------|---------|-------------|
+| `soulCampfireCreatedUnlit` | `false` | Soul campfire starts lit when placed |
+| `soulCampfireDefaultLifeTime` | `4000` ticks | Starting fuel when placed |
+| `soulCampfireInfiniteLifeTime` | `true` | Burns forever by default |
+| `soulCampfireDestroyedOnBurnout` | `false` | Break instead of extinguish |
+
+### Miscellaneous
+| Option | Default | Description |
+|--------|---------|-------------|
+| `campfireFuelMultiplier` | `1` | Multiplier for all fuel burn times |
+| `doubleFlintIgnition` | `true` | Enable/disable two-flint ignition |
+| `flintIgniteChance` | `0.33` | Success chance (0.0 – 1.0) |
+| `worldgenCampfiresInfinite` | `true` | Village campfires burn forever |
+| `makingEternalCampfires` | `true` | Enable/disable infinite campfire mechanic |
+| `infinteCampfireItem` | `minecraft:dragon_breath` | Item used to make campfires infinite |
+
+---
+
+## 🔧 Compatibility
+
+| Mod | Status |
+|-----|--------|
+| Healing Campfire | ✅ Compatible |
+| No Hostiles Around Campfire | ✅ Compatible |
+| Colored Campfire Smoke | ✅ Compatible |
+| Campful | ✅ Replaces recipes and non-silk touch drops |
+| Endergetic Expansion | ✅ Replaces recipe of ender campfire |
+| Infernal Expansion | ✅ Compatible |
+| Any mod modifying campfires | ✅ Should be compatible |
+
+> **Found an incompatibility?** Please report it on the GitHub repository!
+
+---
+
+## 📋 Requirements
+
+- **Minecraft:** 1.20.x (for now 1.20.1 already test and work, another  version still in test)
+- **Mod Loader:** Forge 47.x
+- **Java:** 17 or higher
+- **Dependencies:** None
+
+---
+
+## 📜 Credits
+
+Original mod **[Campfire Overhaul](https://www.curseforge.com/minecraft/mc-mods/campfire-overhaul)** created by **ZanderMeister**, licensed under **MIT License**.  
+This port to 1.20.x and 1.21.x preserves all original mechanics. All credits for the original concept and design go to ZanderMeister.
+
+---
+
+## 🐛 Bug Reports
+
+If you find any bugs, please open an issue on the GitHub repository.  
+Include your **Forge version**, **list of other mods**, and the **`latest.log`** from `.minecraft/logs/`.
