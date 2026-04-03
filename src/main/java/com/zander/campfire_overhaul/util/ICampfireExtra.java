@@ -4,4 +4,7 @@ public interface ICampfireExtra {
     int getLifeTime();
     void addLifeTime(int add);
     void setLifeTime(int set);
+
+    void campfireOverhaul_extinguish();
+    void campfireOverhaul_break();
 }

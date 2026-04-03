@@ -1,14 +1,14 @@
 {
 	"required": true,
 	"package": "com.zander.campfire_overhaul.mixin",
-	"compatibilityLevel": "JAVA_8",
+	"compatibilityLevel": "JAVA_17",
 	"refmap": "campfire_overhaul.refmap.json",
 	"mixins": [
 		"CampfireBlockMixin",
-		"CampfireTileEntityMixin"
+		"CampfireBlockEntityMixin"
 	],
 	"injectors": {
-    "defaultRequire": 1
-    },
+		"defaultRequire": 1
+	},
 	"minVersion": "0.8"
 }

@@ -1,12 +1,11 @@
 package com.zander.campfire_overhaul.util;
 
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class CampfireHelper {
-    public static boolean isSoul(BlockState state)
-    {
-        //ender campfires by default count as soul
-        //maybe add a separate config option, dunno
-        return (state.getBlock().getRegistryName().toString().indexOf("soul") != -1) || (state.getBlock().getRegistryName().toString().indexOf("ender") != -1);
+    public static boolean isSoul(BlockState state) {
+        String blockId = ForgeRegistries.BLOCKS.getKey(state.getBlock()).toString();
+        return blockId.contains("soul") || blockId.contains("ender");
     }
 }
