@@ -1,4 +1,4 @@
-![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-green)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.x-green)
 ![Forge](https://img.shields.io/badge/Forge-47.x-orange)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
