@@ -40,57 +40,63 @@ public class AlternativeFireMethods {
 
         if (player.getMainHandItem().getItem() == Items.FLINT
                 && player.getOffhandItem().getItem() == Items.FLINT) {
+            tryDoubleFlintIgnition(world, player, blockPos, blockState);
+        } else {
+            tryInfiniteCampfireConversion(world, player, blockPos, blockState);
+        }
+    }
 
-            if (!CampfireOverhaulConfig.DOUBLE_FLINT_IGNITION.get()) return;
+    private static void tryDoubleFlintIgnition(Level world, Player player, BlockPos blockPos, BlockState blockState) {
+        if (!CampfireOverhaulConfig.DOUBLE_FLINT_IGNITION.get()) return;
 
-            Random rand = new Random(world.random.nextLong());
-            player.swing(InteractionHand.MAIN_HAND);
+        Random rand = new Random(world.random.nextLong());
+        player.swing(InteractionHand.MAIN_HAND);
 
-            if (rand.nextFloat() < CampfireOverhaulConfig.FLINT_IGNITE_CHANCE.get()
-                    && !world.isClientSide) {
-                world.setBlock(blockPos,
-                        blockState.setValue(BlockStateProperties.LIT, Boolean.TRUE), 3);
-            }
+        if (rand.nextFloat() < CampfireOverhaulConfig.FLINT_IGNITE_CHANCE.get()
+                && !world.isClientSide) {
+            world.setBlock(blockPos,
+                    blockState.setValue(BlockStateProperties.LIT, Boolean.TRUE), 3);
+        }
 
-            world.playSound(null, blockPos, SoundEvents.STONE_STEP,
-                    SoundSource.BLOCKS, 1.0F, 2F + rand.nextFloat() * 0.4F);
+        world.playSound(null, blockPos, SoundEvents.STONE_STEP,
+                SoundSource.BLOCKS, 1.0F, 2F + rand.nextFloat() * 0.4F);
 
-            if (world.isClientSide) {
-                for (int i = 0; i < 5; i++) {
-                    world.addParticle(ParticleTypes.SMOKE,
-                            player.getX() + player.getLookAngle().x + rand.nextFloat() * 0.25,
-                            player.getY() + 0.5f + rand.nextFloat() * 0.25,
-                            player.getZ() + player.getLookAngle().z + rand.nextFloat() * 0.25,
-                            0, 0.01, 0);
-                }
-                world.addParticle(ParticleTypes.FLAME,
+        if (world.isClientSide) {
+            for (int i = 0; i < 5; i++) {
+                world.addParticle(ParticleTypes.SMOKE,
                         player.getX() + player.getLookAngle().x + rand.nextFloat() * 0.25,
                         player.getY() + 0.5f + rand.nextFloat() * 0.25,
                         player.getZ() + player.getLookAngle().z + rand.nextFloat() * 0.25,
                         0, 0.01, 0);
             }
-
-        } else {
-            ResourceLocation heldItemId = ForgeRegistries.ITEMS.getKey(
-                    player.getMainHandItem().getItem());
-            ResourceLocation configItemId = ResourceLocation.tryParse(
-                    CampfireOverhaulConfig.INFINTE_CAMPFIRE_ITEM.get());
-
-
-            if (configItemId == null || !configItemId.equals(heldItemId)) return;
-            if (!CampfireOverhaulConfig.MAKING_INFINITE_CAMPFIRES.get()) return;
-
-            if (!world.isClientSide) {
-                world.setBlock(blockPos,
-                        blockState.setValue(BlockStateProperties.LIT, Boolean.TRUE), 3);
-                if (world.getBlockEntity(blockPos) instanceof ICampfireExtra extra) {
-                    extra.setLifeTime(-1337);
-                }
-            }
-            world.playSound(null, blockPos,
-                    SoundEvents.ENCHANTMENT_TABLE_USE,
-                    SoundSource.BLOCKS, 1.0F, 1.0F);
+            world.addParticle(ParticleTypes.FLAME,
+                    player.getX() + player.getLookAngle().x + rand.nextFloat() * 0.25,
+                    player.getY() + 0.5f + rand.nextFloat() * 0.25,
+                    player.getZ() + player.getLookAngle().z + rand.nextFloat() * 0.25,
+                    0, 0.01, 0);
         }
+    }
+
+    private static void tryInfiniteCampfireConversion(Level world, Player player, BlockPos blockPos, BlockState blockState) {
+        ResourceLocation heldItemId = ForgeRegistries.ITEMS.getKey(
+                player.getMainHandItem().getItem());
+        ResourceLocation configItemId = ResourceLocation.tryParse(
+                CampfireOverhaulConfig.INFINTE_CAMPFIRE_ITEM.get());
+
+
+        if (configItemId == null || !configItemId.equals(heldItemId)) return;
+        if (!CampfireOverhaulConfig.MAKING_INFINITE_CAMPFIRES.get()) return;
+
+        if (!world.isClientSide) {
+            world.setBlock(blockPos,
+                    blockState.setValue(BlockStateProperties.LIT, Boolean.TRUE), 3);
+            if (world.getBlockEntity(blockPos) instanceof ICampfireExtra extra) {
+                extra.setLifeTime(ICampfireExtra.INFINITE_LIFE_TIME);
+            }
+        }
+        world.playSound(null, blockPos,
+                SoundEvents.ENCHANTMENT_TABLE_USE,
+                SoundSource.BLOCKS, 1.0F, 1.0F);
     }
 
     @SubscribeEvent
@@ -107,7 +113,7 @@ public class AlternativeFireMethods {
 
         if (!world.isClientSide) {
             if (world.getBlockEntity(pos) instanceof ICampfireExtra info) {
-                if (info.getLifeTime() == -1337) {
+                if (info.getLifeTime() == ICampfireExtra.INFINITE_LIFE_TIME) {
                     player.sendSystemMessage(
                             Component.literal("This campfire will burn forever!"));
                 } else if (info.getLifeTime() == 0) {
@@ -141,14 +147,6 @@ public class AlternativeFireMethods {
 
         ICampfireExtra lifeTime = (ICampfireExtra) campfireEntity;
 
-        if (CampfireHelper.isSoul(placed)) {
-            lifeTime.setLifeTime(CampfireOverhaulConfig.SOUL_CAMPFIRE_INFINITE_LIFE_TIME.get()
-                    ? -1337
-                    : CampfireOverhaulConfig.SOUL_CAMPFIRE_DEFAULT_LIFE_TIME.get());
-        } else {
-            lifeTime.setLifeTime(CampfireOverhaulConfig.CAMPFIRE_INFINITE_LIFE_TIME.get()
-                    ? -1337
-                    : CampfireOverhaulConfig.CAMPFIRE_DEFAULT_LIFE_TIME.get());
-        }
+        lifeTime.setLifeTime(CampfireHelper.getInitialLifeTime(placed));
     }
 }

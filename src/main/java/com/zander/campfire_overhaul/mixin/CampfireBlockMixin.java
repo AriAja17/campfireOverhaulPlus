@@ -86,7 +86,7 @@ public abstract class CampfireBlockMixin extends BaseEntityBlock {
         if (itemEntity.getOwner() == null) return;
 
         if (!(world.getBlockEntity(pos) instanceof ICampfireExtra extra)) return;
-        if (extra.getLifeTime() == -1337) return;
+        if (extra.getLifeTime() == ICampfireExtra.INFINITE_LIFE_TIME) return;
 
         int maxLife = CampfireHelper.isSoul(state)
                 ? CampfireOverhaulConfig.SOUL_CAMPFIRE_MAX_LIFE_TIME.get()

@@ -34,7 +34,7 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
     private NonNullList<ItemStack> items;
 
     @Unique
-    private int campfireOverhaul$lifeTime = -1337;
+    private int campfireOverhaul$lifeTime = ICampfireExtra.INFINITE_LIFE_TIME;
 
     // Transient countdown cadence counter. Not persisted in NBT.
     @Unique
@@ -107,9 +107,9 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
     )
     private void campfireOverhaul$init(BlockPos pos, BlockState state, CallbackInfo ci) {
         if (CampfireOverhaulConfig.WORLDGEN_CAMPFIRES_INFINITE.get())
-            campfireOverhaul$lifeTime = -1337;
+            campfireOverhaul$lifeTime = ICampfireExtra.INFINITE_LIFE_TIME;
         else
-            campfireOverhaul$lifeTime = -9999;
+            campfireOverhaul$lifeTime = ICampfireExtra.UNINITIALIZED_LIFE_TIME;
     }
 
     @Inject(
@@ -120,37 +120,26 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
     private static void campfireOverhaul$cookTick(Level level, BlockPos pos, BlockState state, CampfireBlockEntity campfire, CallbackInfo ci) {
         ICampfireExtra extra = (ICampfireExtra) campfire;
 
-        // Indirectly created campfires: resolve the -9999 sentinel using the
-        // configured tick values directly. No seconds/ticks rescale is applied.
-        if (extra.getLifeTime() == -9999) {
-            if (CampfireHelper.isSoul(state)) {
-                extra.setLifeTime(CampfireOverhaulConfig.SOUL_CAMPFIRE_INFINITE_LIFE_TIME.get()
-                        ? -1337
-                        : CampfireOverhaulConfig.SOUL_CAMPFIRE_DEFAULT_LIFE_TIME.get());
-            } else {
-                extra.setLifeTime(CampfireOverhaulConfig.CAMPFIRE_INFINITE_LIFE_TIME.get()
-                        ? -1337
-                        : CampfireOverhaulConfig.CAMPFIRE_DEFAULT_LIFE_TIME.get());
-            }
+        // Indirectly created campfires: resolve the uninitialized-lifetime
+        // sentinel using the configured tick values directly. No seconds/ticks
+        // rescale is applied.
+        if (extra.getLifeTime() == ICampfireExtra.UNINITIALIZED_LIFE_TIME) {
+            extra.setLifeTime(CampfireHelper.getInitialLifeTime(state));
         }
 
-        if (extra.getLifeTime() != -1337) {
+        if (extra.getLifeTime() != ICampfireExtra.INFINITE_LIFE_TIME) {
             if (level.getBlockState(pos).getValue(CampfireBlock.LIT)) {
                 if (extra.getLifeTime() > 0) {
                     extra.decrementLifeTime();
                 } else {
                     extra.setLifeTime(0);
-                    if (CampfireHelper.isSoul(state)) {
-                        if (CampfireOverhaulConfig.SOUL_CAMPFIRE_DESTROYED_ON_BURNOUT.get())
-                            extra.campfireOverhaul_break();
-                        else
-                            extra.campfireOverhaul_extinguish();
-                    } else {
-                        if (CampfireOverhaulConfig.CAMPFIRE_DESTROYED_ON_BURNOUT.get())
-                            extra.campfireOverhaul_break();
-                        else
-                            extra.campfireOverhaul_extinguish();
-                    }
+                    boolean destroyOnBurnout = CampfireHelper.isSoul(state)
+                            ? CampfireOverhaulConfig.SOUL_CAMPFIRE_DESTROYED_ON_BURNOUT.get()
+                            : CampfireOverhaulConfig.CAMPFIRE_DESTROYED_ON_BURNOUT.get();
+                    if (destroyOnBurnout)
+                        extra.campfireOverhaul_break();
+                    else
+                        extra.campfireOverhaul_extinguish();
                     // Burnout actually occurred: do not let vanilla cookTick
                     // continue against a changed/removed campfire.
                     ci.cancel();
