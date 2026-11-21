@@ -36,17 +36,39 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
     @Unique
     private int campfireOverhaul$lifeTime = -1337;
 
+    // Transient countdown cadence counter. Not persisted in NBT.
+    @Unique
+    private int campfireOverhaul$dirtyCountdownTicks;
+
     @Unique
     @Override
     public int getLifeTime() { return campfireOverhaul$lifeTime; }
 
+    // Discrete lifetime mutations mark the BlockEntity dirty immediately.
     @Unique
     @Override
-    public void addLifeTime(int add) { campfireOverhaul$lifeTime += add; }
+    public void addLifeTime(int add) {
+        campfireOverhaul$lifeTime += add;
+        this.setChanged();
+    }
 
     @Unique
     @Override
-    public void setLifeTime(int set) { campfireOverhaul$lifeTime = set; }
+    public void setLifeTime(int set) {
+        campfireOverhaul$lifeTime = set;
+        this.setChanged();
+    }
+
+    // Countdown path: dirty-mark at most once per 20 active countdown ticks.
+    @Unique
+    @Override
+    public void decrementLifeTime() {
+        campfireOverhaul$lifeTime -= 1;
+        if (++campfireOverhaul$dirtyCountdownTicks >= 20) {
+            campfireOverhaul$dirtyCountdownTicks = 0;
+            this.setChanged();
+        }
+    }
 
     public CampfireBlockEntityMixin(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -92,27 +114,30 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
 
     @Inject(
             at = @At("HEAD"),
-            method = "cookTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;)V"
+            method = "cookTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;)V",
+            cancellable = true
     )
     private static void campfireOverhaul$cookTick(Level level, BlockPos pos, BlockState state, CampfireBlockEntity campfire, CallbackInfo ci) {
         ICampfireExtra extra = (ICampfireExtra) campfire;
 
+        // Indirectly created campfires: resolve the -9999 sentinel using the
+        // configured tick values directly. No seconds/ticks rescale is applied.
         if (extra.getLifeTime() == -9999) {
             if (CampfireHelper.isSoul(state)) {
                 extra.setLifeTime(CampfireOverhaulConfig.SOUL_CAMPFIRE_INFINITE_LIFE_TIME.get()
                         ? -1337
-                        : CampfireOverhaulConfig.SOUL_CAMPFIRE_DEFAULT_LIFE_TIME.get() * 10000);
+                        : CampfireOverhaulConfig.SOUL_CAMPFIRE_DEFAULT_LIFE_TIME.get());
             } else {
                 extra.setLifeTime(CampfireOverhaulConfig.CAMPFIRE_INFINITE_LIFE_TIME.get()
                         ? -1337
-                        : CampfireOverhaulConfig.CAMPFIRE_DEFAULT_LIFE_TIME.get() * 10000);
+                        : CampfireOverhaulConfig.CAMPFIRE_DEFAULT_LIFE_TIME.get());
             }
         }
 
         if (extra.getLifeTime() != -1337) {
             if (level.getBlockState(pos).getValue(CampfireBlock.LIT)) {
                 if (extra.getLifeTime() > 0) {
-                    extra.addLifeTime(-1);
+                    extra.decrementLifeTime();
                 } else {
                     extra.setLifeTime(0);
                     if (CampfireHelper.isSoul(state)) {
@@ -126,6 +151,10 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
                         else
                             extra.campfireOverhaul_extinguish();
                     }
+                    // Burnout actually occurred: do not let vanilla cookTick
+                    // continue against a changed/removed campfire.
+                    ci.cancel();
+                    return;
                 }
             }
         }
@@ -134,7 +163,8 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
     @Inject(at = @At("RETURN"), method = "load(Lnet/minecraft/nbt/CompoundTag;)V")
     private void campfireOverhaul$load(CompoundTag nbt, CallbackInfo ci) {
         if (nbt.contains("LifeTime", 3)) {
-            setLifeTime(nbt.getInt("LifeTime"));
+            // Restore the stored value without marking the BlockEntity dirty.
+            campfireOverhaul$lifeTime = nbt.getInt("LifeTime");
         }
     }
 

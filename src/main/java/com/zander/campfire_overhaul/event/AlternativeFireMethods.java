@@ -125,6 +125,15 @@ public class AlternativeFireMethods {
     public void campfireSet(BlockEvent.EntityPlaceEvent event) {
         if (!(event.getLevel() instanceof Level level)) return;
 
+        // Forge fires EntityPlaceEvent for any block-state change caused by a
+        // right-click item use, not just for genuinely new placements: flint &
+        // steel lights a campfire via setBlock(LIT=true), which is captured as
+        // a block snapshot. The snapshot stores the state that was replaced,
+        // so an existing campfire there means this is only a state change and
+        // its stored lifetime must be preserved.
+        BlockState replaced = event.getBlockSnapshot().getReplacedBlock();
+        if (replaced != null && replaced.getBlock() instanceof CampfireBlock) return;
+
         BlockState placed = event.getPlacedBlock();
         BlockPos pos = event.getPos();
 

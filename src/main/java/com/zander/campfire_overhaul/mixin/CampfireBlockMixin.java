@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ForgeHooks;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -30,6 +31,18 @@ public abstract class CampfireBlockMixin extends BaseEntityBlock {
 
     protected CampfireBlockMixin(BlockBehaviour.Properties properties) {
         super(properties);
+    }
+
+    /**
+     * Returns min(value * factor, cap) without overflow. All inputs are positive.
+     * If value > cap / factor the product is at least cap, so cap is returned
+     * directly; otherwise the product is <= cap and therefore fits comfortably.
+     */
+    @Unique
+    private static long campfireOverhaul$multiplyCapped(long value, long factor, long cap) {
+        if (value <= 0L || factor <= 0L || cap <= 0L) return 0L;
+        if (value > cap / factor) return cap;
+        return value * factor;
     }
 
     @Inject(
@@ -79,16 +92,24 @@ public abstract class CampfireBlockMixin extends BaseEntityBlock {
                 ? CampfireOverhaulConfig.SOUL_CAMPFIRE_MAX_LIFE_TIME.get()
                 : CampfireOverhaulConfig.CAMPFIRE_MAX_LIFE_TIME.get();
 
-        if (extra.getLifeTime() >= 0 && extra.getLifeTime() < maxLife) {
-            int burnTime = rawBurnTime
-                    * CampfireOverhaulConfig.CAMPFIRE_FUEL_MULTIPLIER.get()
-                    * itemEntity.getItem().getCount();
-            extra.addLifeTime(burnTime);
+        int currentLifetime = extra.getLifeTime();
+        if (currentLifetime < 0 || currentLifetime >= maxLife) return;
 
-            if (itemEntity.getItem().getItem() == Items.LAVA_BUCKET) {
-                Block.popResource(world, pos, new ItemStack(Items.BUCKET));
-            }
-            entityIn.discard();
+        long capacity = (long) maxLife - (long) currentLifetime; // positive here
+        long accepted = campfireOverhaul$multiplyCapped(rawBurnTime,
+                CampfireOverhaulConfig.CAMPFIRE_FUEL_MULTIPLIER.get(), capacity);
+        accepted = campfireOverhaul$multiplyCapped(accepted,
+                itemEntity.getItem().getCount(), capacity);
+
+        // No capacity or no accepted fuel: do not consume the thrown item.
+        if (accepted <= 0L) return;
+
+        // accepted <= capacity <= Integer.MAX_VALUE, so the cast is safe.
+        extra.addLifeTime((int) accepted);
+
+        if (itemEntity.getItem().getItem() == Items.LAVA_BUCKET) {
+            Block.popResource(world, pos, new ItemStack(Items.BUCKET));
         }
+        entityIn.discard();
     }
 }
