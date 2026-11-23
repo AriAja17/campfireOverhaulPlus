@@ -59,7 +59,7 @@ Campfires now have a **fuel lifetime** - when they run out of fuel, they die out
 - Set a **fuel multiplier** to make fuel last longer or shorter
 
 **Special mechanics:**
-- **Right-click with Dragon's Breath** *(item configurable)* to make the campfire burn **forever**
+- **Right-click with Dragon's Breath** *(item configurable)* to make the campfire burn **forever** — one item is consumed per use, accompanied by an ender dragon growl and purple particles
 - **Right-click with empty hands** to check remaining fuel in seconds
 - Soul campfires have **infinite lifetime** by default *(configurable)* to make them feel more unique
 - World-generated campfires (e.g. villages) are **infinite by default**

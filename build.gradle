@@ -97,6 +97,75 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', mod_id
+            workingDirectory project.file('run/gametest-gt01')
+            mods {
+                "${mod_id}" {
+                    source sourceSets.test
+                }
+            }
+        }
+
+        // GT-02 DEFAULT profile: isolated working directory and GameTest namespace.
+        gameTestServerGt02Default {
+            // Inherit the launcher main class, JVM args and env from the
+            // built-in gameTestServer run; only the profile-specific bits below
+            // are overridden.
+            parent runs.gameTestServer
+            property 'forge.enabledGameTestNamespaces', 'campfire_overhaul_gt02_default'
+            workingDirectory project.file('run/gametest-gt02-default')
+            mods {
+                "${mod_id}" {
+                    source sourceSets.test
+                }
+            }
+        }
+
+        // GT-02 CAP1000 profile.
+        gameTestServerGt02Cap1000 {
+            parent runs.gameTestServer
+            property 'forge.enabledGameTestNamespaces', 'campfire_overhaul_gt02_cap1000'
+            workingDirectory project.file('run/gametest-gt02-cap1000')
+            mods {
+                "${mod_id}" {
+                    source sourceSets.test
+                }
+            }
+        }
+
+        // GT-02 ZERO profile.
+        gameTestServerGt02Zero {
+            parent runs.gameTestServer
+            property 'forge.enabledGameTestNamespaces', 'campfire_overhaul_gt02_zero'
+            workingDirectory project.file('run/gametest-gt02-zero')
+            mods {
+                "${mod_id}" {
+                    source sourceSets.test
+                }
+            }
+        }
+
+        // GT-02 OVERFLOW profile.
+        gameTestServerGt02Overflow {
+            parent runs.gameTestServer
+            property 'forge.enabledGameTestNamespaces', 'campfire_overhaul_gt02_overflow'
+            workingDirectory project.file('run/gametest-gt02-overflow')
+            mods {
+                "${mod_id}" {
+                    source sourceSets.test
+                }
+            }
+        }
+
+        // GT-03 BURNOUT profile: isolated working directory and namespace.
+        gameTestServerGt03Burnout {
+            parent runs.gameTestServer
+            property 'forge.enabledGameTestNamespaces', 'campfire_overhaul_gt03_burnout'
+            workingDirectory project.file('run/gametest-gt03-burnout')
+            mods {
+                "${mod_id}" {
+                    source sourceSets.test
+                }
+            }
         }
 
         data {

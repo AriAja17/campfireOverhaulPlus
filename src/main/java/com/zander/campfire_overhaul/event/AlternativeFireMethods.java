@@ -93,10 +93,25 @@ public class AlternativeFireMethods {
             if (world.getBlockEntity(blockPos) instanceof ICampfireExtra extra) {
                 extra.setLifeTime(ICampfireExtra.INFINITE_LIFE_TIME);
             }
+            player.getMainHandItem().shrink(1);
         }
         world.playSound(null, blockPos,
                 SoundEvents.ENCHANTMENT_TABLE_USE,
                 SoundSource.BLOCKS, 1.0F, 1.0F);
+
+        world.playSound(null, blockPos,
+                SoundEvents.ENDER_DRAGON_GROWL,
+                SoundSource.BLOCKS, 1.0F, 1.0F);
+
+        if (world.isClientSide) {
+            for (int i = 0; i < 12; i++) {
+                world.addParticle(ParticleTypes.PORTAL,
+                        blockPos.getX() + 0.5D + (world.random.nextDouble() - 0.5D) * 0.6D,
+                        blockPos.getY() + 0.5D + world.random.nextDouble() * 0.5D,
+                        blockPos.getZ() + 0.5D + (world.random.nextDouble() - 0.5D) * 0.6D,
+                        0, 0.02D, 0);
+            }
+        }
     }
 
     @SubscribeEvent
