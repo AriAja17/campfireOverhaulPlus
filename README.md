@@ -1,12 +1,12 @@
-![Minecraft](https://img.shields.io/badge/Minecraft-1.20.x-green)
-![Forge](https://img.shields.io/badge/Forge-47.x-orange)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-green)
+![Forge](https://img.shields.io/badge/Forge-47.3.0-orange)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
 # 🔥 Campfire Overhaul+
 
 > *"For comfy nightstands out in the wilderness."*
 
-A community port of the original **Campfire Overhaul** by ZanderMeister to Minecraft 1.20.x and 1.21.x.  
+A community port of the original **Campfire Overhaul** by ZanderMeister to Minecraft 1.20.1.<br>
 Transforms the vanilla campfire from an expensive, slow, and pretty much useless 4-slot smoker into an actual utility with new mechanics, recipes, and overall increased immersion.
 
 ---
@@ -23,7 +23,7 @@ Perfect for survival situations when you don't have a crafting bench nearby.
 ---
 
 ### 🍳 New Campfire Recipes
-Cook up to **4 items at once** directly on the campfire (slower than a furnace, but no fuel needed):
+Cook up to **4 items at once** directly on the campfire (slower than a furnace):
 - 🪵 Burn **logs** → **Charcoal**
 - 🔥 Craft **torches** from sticks
 - 🧽 Dry **wet sponges** back to dry
@@ -32,7 +32,7 @@ Cook up to **4 items at once** directly on the campfire (slower than a furnace, 
 ---
 
 ### 🌑 Campfire Placed Unlit *(configurable)*
-Both campfire types are now created **unlit** by default.  
+Normal campfires are created **unlit** by default; soul campfires start **lit** (both configurable).<br>
 Light them up vanilla-style: flint & steel, flaming arrows, fire charges - or use the new methods below.
 
 ---
@@ -53,7 +53,7 @@ Campfires now have a **fuel lifetime** - when they run out of fuel, they die out
 
 **Refueling:**
 - **Throw (Q) any burnable item** onto the campfire to add fuel
-- All vanilla fuels are supported, most modded fuels too
+- Vanilla smelting fuels are supported (tested with coal and lava buckets); modded fuel integration is not yet verified and is deferred to Phase 5
 - Throwing a **Lava Bucket** works too - the empty bucket is returned
 - Fuel items give the same amount of time as they do in a furnace
 - Set a **fuel multiplier** to make fuel last longer or shorter
@@ -110,13 +110,15 @@ saves/[world_name]/serverconfig/campfire_overhaul-server.toml
 
 | Mod | Status |
 |-----|--------|
-| Healing Campfire | ✅ Compatible |
-| No Hostiles Around Campfire | ✅ Compatible |
-| Colored Campfire Smoke | ✅ Compatible |
-| Campful | ✅ Replaces recipes and non-silk touch drops |
-| Endergetic Expansion | ✅ Replaces recipe of ender campfire |
-| Infernal Expansion | ✅ Compatible |
-| Any mod modifying campfires | ✅ Should be compatible |
+| Healing Campfire | Not Yet Verified |
+| No Hostiles Around Campfire | Not Yet Verified |
+| Colored Campfire Smoke | Not Yet Verified |
+| Campful | Not Yet Verified |
+| Endergetic Expansion | Not Yet Verified |
+| Infernal Expansion | Not Yet Verified |
+| Any mod modifying campfires | Not Yet Verified — no general compatibility guarantee |
+
+Integration testing for these mods is **blocked** because compatible mod JAR files were unavailable; no compatibility or incompatibility is claimed. The project ships compatibility data namespaces for Campful, Endergetic Expansion and Infernal Expansion, but those data files alone do not constitute verified runtime compatibility.
 
 > **Found an incompatibility?** Please report it on the GitHub repository!
 
@@ -124,9 +126,9 @@ saves/[world_name]/serverconfig/campfire_overhaul-server.toml
 
 ## 📋 Requirements
 
-- **Minecraft:** 1.20.x (for now 1.20.1 already test and work, another  version still in test)
-- **Mod Loader:** Forge 47.x
-- **Java:** 17 or higher
+- **Minecraft:** 1.20.1 (tested and supported). The build declares the range `[1.20.1,1.21)`; Minecraft 1.21.x has **not** been tested or ported.
+- **Mod Loader:** Forge 47.3.0 (loader range `[47,)`)
+- **Java:** 17 (Gradle toolchain)
 - **Dependencies:** None
 
 ---
@@ -134,7 +136,7 @@ saves/[world_name]/serverconfig/campfire_overhaul-server.toml
 ## 📜 Credits
 
 Original mod **[Campfire Overhaul](https://www.curseforge.com/minecraft/mc-mods/campfire-overhaul)** created by **ZanderMeister**, licensed under **MIT License**.  
-This port to 1.20.x and 1.21.x preserves all original mechanics. All credits for the original concept and design go to ZanderMeister.
+This port to Minecraft 1.20.1 preserves all original mechanics. All credits for the original concept and design go to ZanderMeister.
 
 ---
 
